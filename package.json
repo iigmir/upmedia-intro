@@ -1,0 +1,20 @@
+{
+  "name": "upmedia-intro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node cli.js landing",
+    "start:list": "node cli.js list",
+    "start:news": "node cli.js news",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "jsdom": "^24.0.0",
+    "papaparse": "^5.4.1"
+  }
+}
