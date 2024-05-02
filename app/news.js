@@ -7,44 +7,50 @@ const IMAGE_HOST = "https://www.upmedia.mg";
 
 const write_file_action = (document, SerialNo) => {
     const NEWS_DIR = `result/${SerialNo}`;
-    
+    const ACTIONS = {
+        SOURCE: "source",
+        MARKDOWN: "markdown",
+        IMAGE_LIST: "image_list",
+        METAINFO: "metainfo",
+    };
+
     const get_path = (action) => {
         switch (action) {
-            case "source": return `${NEWS_DIR}/source.html`;
-            case "markdown": return `${NEWS_DIR}/article.md`;
-            case "image_list": return `${NEWS_DIR}/images.json`;
-            case "meta_info": return `${NEWS_DIR}/metainfo.json`;
+            case ACTIONS.SOURCE: return `${NEWS_DIR}/source.html`;
+            case ACTIONS.MARKDOWN: return `${NEWS_DIR}/article.md`;
+            case ACTIONS.IMAGE_LIST: return `${NEWS_DIR}/images.json`;
+            case ACTIONS.METAINFO: return `${NEWS_DIR}/metainfo.json`;
             default: return `${NEWS_DIR}/unknown-file.txt`;
         }
     };
 
     const get_content = (document, SerialNo, action) => {
         switch (action) {
-            case "source": return content_to_html(
+            case ACTIONS.SOURCE: return content_to_html(
                 get_news_content(document),
                 `${document.title} (id: ${SerialNo})`
             );
-            case "markdown": return get_news_paragraphs(
+            case ACTIONS.MARKDOWN: return get_news_paragraphs(
                 document,
                 SerialNo
             ).join("\n\n");
-            case "image_list": return JSON.stringify(
+            case ACTIONS.IMAGE_LIST: return JSON.stringify(
                 get_news_images(document, SerialNo)
                 .map((dom) => `${IMAGE_HOST}/${dom.src}`)
             );
-            case "meta_info": return JSON.stringify({
+            case ACTIONS.METAINFO: return JSON.stringify({
                 title: document.title,
                 id: SerialNo,
                 url: `${WEBSITE_HOST}/news_info.php?SerialNo=${SerialNo}`,
                 meta: get_metadata_list(document)
             });
-            default: return "";
+            default: return "(UNKNOWN CONTENT)";
         }
     };
 
     // Actions
     create_dir(NEWS_DIR);
-    ["source", "markdown", "image_list", "meta_info"].forEach( (action) => {
+    [ACTIONS.SOURCE, ACTIONS.MARKDOWN, ACTIONS.IMAGE_LIST, ACTIONS.METAINFO].forEach( (action) => {
         const path = get_path(action);
         const content = get_content(document, SerialNo, action);
         write_file( path, content );
