@@ -8,22 +8,26 @@ const IMAGE_HOST = "https://www.upmedia.mg";
 const write_file_action = (document, SerialNo) => {
     const news_dir = `result/${SerialNo}`;
     const create_source = (document, SerialNo) => {
-        const source_page = content_to_html(
+        const source_content = content_to_html(
             get_news_content(document),
             `${document.title} (id: ${SerialNo})`
         );
         const path = `${news_dir}/source.html`;
-        write_file(path, source_page);
+        // Write file
+        write_file(path, source_content);
     };
     const create_markdown = (document, SerialNo) => {
-        const source_page = get_news_paragraphs(document, SerialNo).join("\n\n");
+        const source_content = get_news_paragraphs(document, SerialNo).join("\n\n");
         const path = `${news_dir}/article.md`;
-        write_file(path, source_page);
+        // Write file
+        write_file(path, source_content);
     };
     const create_image_list = (document, SerialNo) => {
         const imgs = get_news_images(document, SerialNo).map((dom) => `${IMAGE_HOST}/${dom.src}`);
+        const source_content = JSON.stringify(imgs);
         const path = `${news_dir}/images.json`;
-        write_file(path, JSON.stringify(imgs));
+        // Write file
+        write_file(path, source_content);
     };
     const create_meta_info = (document, SerialNo) => {
         const metainfo = {
@@ -32,8 +36,10 @@ const write_file_action = (document, SerialNo) => {
             url: `${WEBSITE_HOST}/news_info.php?SerialNo=${SerialNo}`,
             meta: get_metadata_list(document)
         };
+        const source_content  = JSON.stringify(metainfo);
         const path = `${news_dir}/metainfo.json`;
-        write_file(path, JSON.stringify(metainfo));
+        // Write file
+        write_file(path, source_content);
     };
     create_dir(news_dir);
     create_source(document, SerialNo);
@@ -43,20 +49,19 @@ const write_file_action = (document, SerialNo) => {
 };
 
 const get_web_document = (SerialNo = "1") => {
-    return new Promise( (resolve, reject) => {
-        get_news_by_id(SerialNo)
-            .then( (document) => {
-                const FORUM_KEYWORD = "大家論壇";
-                if( document.title.includes( FORUM_KEYWORD ) ) {
-                    get_news_forum_info_id(SerialNo)
-                        .then( (forum_document) => resolve(forum_document) )
-                        .catch( error => reject(error) )
-                    ;
-                } else {
-                    resolve(document);
-                }
-            })
-            .catch( error => reject(error) );
+    return new Promise( async (resolve, reject) => {
+        try {
+            const document = await get_news_by_id(SerialNo);
+            const FORUM_KEYWORD = "大家論壇";
+            if( document.title.includes( FORUM_KEYWORD ) ) {
+                const forum_document = await get_news_forum_info_id(SerialNo);
+                resolve(forum_document);
+            } else {
+                resolve(document);
+            }
+        } catch (error) {
+            reject(error);
+        }
     });
 };
 
