@@ -42,14 +42,27 @@ const write_file_action = (document, SerialNo) => {
     create_meta_info(document, SerialNo);
 };
 
+const get_web_document = (SerialNo = "1") => {
+    return new Promise( (resolve, reject) => {
+        get_news_by_id(SerialNo)
+            .then( (document) => {
+                const FORUM_KEYWORD = "大家論壇";
+                if( document.title.includes( FORUM_KEYWORD ) ) {
+                    get_news_forum_info_id(SerialNo)
+                        .then( (forum_document) => resolve(forum_document) )
+                        .catch( error => reject(error) )
+                    ;
+                } else {
+                    resolve(document);
+                }
+            })
+            .catch( error => reject(error) );
+    });
+};
+
 export const get_links_from_news = (SerialNo = "1") => {
-    get_news_by_id(SerialNo).then( (document) => {
-        const is_forum = document.title.includes("大家論壇");
-        if( is_forum ) {
-            get_news_forum_info_id(SerialNo).then( (forum) => write_file_action(forum, SerialNo) );
-        } else {
-            write_file_action(document, SerialNo);
-        }
+    get_web_document(SerialNo).then( (document) => {
+        write_file_action(document, SerialNo)
     });
 };
 
