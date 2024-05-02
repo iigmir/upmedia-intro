@@ -5,7 +5,7 @@ import { content_to_html, write_file, create_dir } from "../lib/fs.js";
 const WEBSITE_HOST = "https://www.upmedia.mg";
 const IMAGE_HOST = "https://www.upmedia.mg";
 
-const main = (document, SerialNo) => {
+const write_file_action = (document, SerialNo) => {
     const news_dir = `result/${SerialNo}`;
     const create_source = (document, SerialNo) => {
         const source_page = content_to_html(
@@ -46,9 +46,9 @@ export const get_links_from_news = (SerialNo = "1") => {
     get_news_by_id(SerialNo).then( (document) => {
         const is_forum = document.title.includes("大家論壇");
         if( is_forum ) {
-            get_news_forum_info_id(SerialNo).then( (forum) => main(forum, SerialNo) );
+            get_news_forum_info_id(SerialNo).then( (forum) => write_file_action(forum, SerialNo) );
         } else {
-            main(document, SerialNo);
+            write_file_action(document, SerialNo);
         }
     });
 };
