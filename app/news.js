@@ -6,46 +6,49 @@ const WEBSITE_HOST = "https://www.upmedia.mg";
 const IMAGE_HOST = "https://www.upmedia.mg";
 
 const write_file_action = (document, SerialNo) => {
-    const news_dir = `result/${SerialNo}`;
-    const create_source = (document, SerialNo) => {
-        const source_content = content_to_html(
-            get_news_content(document),
-            `${document.title} (id: ${SerialNo})`
-        );
-        const path = `${news_dir}/source.html`;
-        // Write file
-        write_file(path, source_content);
+    const NEWS_DIR = `result/${SerialNo}`;
+    
+    const get_path = (action) => {
+        switch (action) {
+            case "source": return `${NEWS_DIR}/source.html`;
+            case "markdown": return `${NEWS_DIR}/article.md`;
+            case "image_list": return `${NEWS_DIR}/images.json`;
+            case "meta_info": return `${NEWS_DIR}/metainfo.json`;
+            default: return `${NEWS_DIR}/unknown-file.txt`;
+        }
     };
-    const create_markdown = (document, SerialNo) => {
-        const source_content = get_news_paragraphs(document, SerialNo).join("\n\n");
-        const path = `${news_dir}/article.md`;
-        // Write file
-        write_file(path, source_content);
+
+    const get_content = (document, SerialNo, action) => {
+        switch (action) {
+            case "source": return content_to_html(
+                get_news_content(document),
+                `${document.title} (id: ${SerialNo})`
+            );
+            case "markdown": return get_news_paragraphs(
+                document,
+                SerialNo
+            ).join("\n\n");
+            case "image_list": return JSON.stringify(
+                get_news_images(document, SerialNo)
+                .map((dom) => `${IMAGE_HOST}/${dom.src}`)
+            );
+            case "meta_info": return JSON.stringify({
+                title: document.title,
+                id: SerialNo,
+                url: `${WEBSITE_HOST}/news_info.php?SerialNo=${SerialNo}`,
+                meta: get_metadata_list(document)
+            });
+            default: return "";
+        }
     };
-    const create_image_list = (document, SerialNo) => {
-        const imgs = get_news_images(document, SerialNo).map((dom) => `${IMAGE_HOST}/${dom.src}`);
-        const source_content = JSON.stringify(imgs);
-        const path = `${news_dir}/images.json`;
-        // Write file
-        write_file(path, source_content);
-    };
-    const create_meta_info = (document, SerialNo) => {
-        const metainfo = {
-            title: document.title,
-            id: SerialNo,
-            url: `${WEBSITE_HOST}/news_info.php?SerialNo=${SerialNo}`,
-            meta: get_metadata_list(document)
-        };
-        const source_content  = JSON.stringify(metainfo);
-        const path = `${news_dir}/metainfo.json`;
-        // Write file
-        write_file(path, source_content);
-    };
-    create_dir(news_dir);
-    create_source(document, SerialNo);
-    create_markdown(document, SerialNo);
-    create_image_list(document, SerialNo);
-    create_meta_info(document, SerialNo);
+
+    // Actions
+    create_dir(NEWS_DIR);
+    ["source", "markdown", "image_list", "meta_info"].forEach( (action) => {
+        const path = get_path(action);
+        const content = get_content(document, SerialNo, action);
+        write_file( path, content );
+    });
 };
 
 const get_web_document = (SerialNo = "1") => {
